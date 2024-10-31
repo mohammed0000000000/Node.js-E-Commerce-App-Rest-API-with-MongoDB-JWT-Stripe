@@ -24,7 +24,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Middleware
 const NotFound = require("./middleware/notFound")
 const mainRoute = require("./routes/index")
+const authRoute = require("./routes/auth")
 app.use("/api/v1",mainRoute)
+app.use("/api/v1",authRoute)
 app.use(NotFound);
 
 
