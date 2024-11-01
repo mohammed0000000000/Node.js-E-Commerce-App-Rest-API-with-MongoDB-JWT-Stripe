@@ -16,9 +16,7 @@ const registerController = async (req, res) => {
         })
     }
     const {username, email, password} = req.body;
-    console.log(User.schema)
     const newUser = await User.create({username, email, password});
-
     return res.status(StatusCodes.CREATED).json({
         status: 'success',
         message: 'User created successfully',
@@ -43,14 +41,61 @@ const loginController = async (req, res) => {
     if (!user) {
         throw new UnauthenticatedError("InValid Credentials!");
     }
-    const matchPassword = await bcrypt.compare(password, user.password);
+    const matchPassword = await user.verifyPassword(password);
     if (!matchPassword) {
         throw new UnauthenticatedError("InValid Credentials!");
     }
+    const token = await user.generateToken();
+    res.cookie("jwt",token,{
+        httpOnly: true,// accessible only by web server
+        secure: true, // access by https in production
+        sameSite: "None",// sameSite == None cookie send to domain and sub domain, if strict only the current site
+        maxAge: 1000 * 60 * 60 * 24 * 7, //
+    })
     return res.status(StatusCodes.OK).json({
-        status: 'success',
         message: "Login Successfully",
+        isAdmin:user.isAdmin,
+        token
     })
 }
+const refresh = (req, res, next) => {
+    const cookies = req.cookies;
+    if (!cookies?.jwt) {
+        return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Unauthorized" });
+    }
+    const refreshToken = cookies.jwt;
+    jwt.verify(refreshToken, process.env['JWT_SECRET'], async (err, decoded) => {
+        if (err) {
+            return res.status(StatusCodes.FORBIDDEN).json({ message: "Forbidden" });
+        }
+        const foundUser = await User.findById(decoded.userInfo.id).exec();
 
-module.exports = {registerController, loginController}
+        if (!foundUser)
+            return res.status(StatusCodes.NOT_FOUND).json({ message: "Unauthorized" });
+
+        const accessToken = jwt.sign(
+            {
+                userInfo: {
+                    id: foundUser.id,
+                },
+            },
+            process.env['JWT_SECRET'],
+            { expiresIn: process.env['JWT_EXPIRE'] }
+        );
+
+        return res.status(StatusCodes.OK).json(accessToken);
+    });
+}
+const logout = (req, res, next) => {
+    const cookies = req.cookies;
+    if (!cookies?.jwt) {
+        return res.sendStatus(StatusCodes.UNAUTHORIZED);
+    }
+    res.clearCookie("jwt", {
+        httpOnly: true,
+        sameSite: "None",
+        secure: true,
+    })
+    return res.status(StatusCodes.OK).json({ message: "Logout Successful" });
+};
+module.exports = {registerController, loginController, refresh}
