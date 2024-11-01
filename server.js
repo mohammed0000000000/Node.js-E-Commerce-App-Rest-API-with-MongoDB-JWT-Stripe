@@ -22,12 +22,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Middleware
-const NotFound = require("./middleware/notFound")
+const NotFoundMiddleware = require("./middleware/notFound")
+const errorHandlerMiddleware = require("./middleware/errorHandler")
 const mainRoute = require("./routes/index")
 const authRoute = require("./routes/auth")
 app.use("/api/v1",mainRoute)
 app.use("/api/v1",authRoute)
-app.use(NotFound);
+app.use(NotFoundMiddleware);
+app.use(errorHandlerMiddleware)
 
 
 mongoose.connection.once('open', () => {
