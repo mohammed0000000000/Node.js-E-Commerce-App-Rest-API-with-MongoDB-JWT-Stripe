@@ -2,7 +2,7 @@
 const User = require("../models/User");
 const {StatusCodes} = require("http-status-codes");
 const {validationResult} = require("express-validator")
-
+const BadRequestError = require("../errors/badRequestError")
 const updateUser = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -26,5 +26,33 @@ const updateUser = async (req, res) => {
     })
 }
 
+const deleteUser = async (req, res) => {
+    const id = req.params.id;
+    const mongooseResponse = await User.deleteOne({_id: id});
+    if (!mongooseResponse.deletedCount) {
+        throw new BadRequestError("User Not Found")
+    }
+    return res.status(StatusCodes.OK).json({
+        message: "User Delete Successfully",
+    })
+}
 
-module.exports = {updateUser}
+const getUser = async (req, res) =>{
+    const id = req.params.id;
+    const user = await User.findOne({_id: id});
+    if (!user) {
+        throw new BadRequestError("User Not Found")
+    }
+    return res.status(StatusCodes.OK).json({
+        message: "User Found Successfully",
+        user: user
+    })
+}
+const getAllUser = async (req, res) =>{
+    const users = await User.find({}).sort("createdAt");
+res.status(StatusCodes.OK).json({
+        message: users ?"Users Found Successfully" :"There is not users",
+        users
+    })
+}
+module.exports = {updateUser,deleteUser,getAllUser, getUser}
