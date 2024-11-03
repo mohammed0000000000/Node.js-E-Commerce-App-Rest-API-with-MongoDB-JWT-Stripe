@@ -11,23 +11,26 @@ const PORT = process.env.PORT || 3001
 
 const databaseConnection = require("./Database/DbConnection")
 
-// Db Connection
+/// Db Connection
 databaseConnection();
 
-// Middleware to handle JSON & URL - encoded form data
+/// Middleware to handle JSON & URL - encoded form data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from public directory
+/// Serve static files from public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Middleware
+/// Middleware
 const NotFoundMiddleware = require("./middleware/notFound")
 const errorHandlerMiddleware = require("./middleware/errorHandler")
-const mainRoute = require("./routes/index")
-const authRoute = require("./routes/auth")
-app.use("/api/v1",mainRoute)
-app.use("/api/v1",authRoute)
+const authenticateMiddleware = require("./middleware/authentication")
+/// routers
+const authRouter = require("./routes/auth")
+const userRouter = require("./routes/user")
+
+app.use("/api/v1/auth",authRouter);
+app.use("/api/v1/user",authenticateMiddleware,userRouter);
 app.use(NotFoundMiddleware);
 app.use(errorHandlerMiddleware)
 

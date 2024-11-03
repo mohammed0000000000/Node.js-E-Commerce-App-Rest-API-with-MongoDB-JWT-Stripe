@@ -24,9 +24,10 @@ const userSchema = new Schmema({
         required:[true, "Please Provide Password"],
         minLength:8,
     },
-    isAdmin:{
-        type:Boolean,
-        default:false
+    role: {
+        type: String,
+        enum: ["user", 'admin'],
+        default: 'user'
     }
 },{timestamps:true});
 
@@ -55,6 +56,7 @@ userSchema.methods.generateToken = async function(){
         {
             userId: this._id,
             username: this.username,
+            role:this.role
         },
         process.env["JWT_SECRET"],
         {

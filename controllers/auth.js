@@ -15,8 +15,9 @@ const registerController = async (req, res) => {
             errors: errorList
         })
     }
-    const {username, email, password} = req.body;
-    const newUser = await User.create({username, email, password});
+    // await User.collection.dropIndex("username_1");
+    const {username, email, password,role} = req.body;
+    const newUser = await User.create({username, email, password,role});
     return res.status(StatusCodes.CREATED).json({
         status: 'success',
         message: 'User created successfully',
@@ -54,7 +55,7 @@ const loginController = async (req, res) => {
     })
     return res.status(StatusCodes.OK).json({
         message: "Login Successfully",
-        isAdmin:user.isAdmin,
+        user:{username:user.username,role:user.role},
         token
     })
 }
@@ -98,4 +99,4 @@ const logout = (req, res, next) => {
     })
     return res.status(StatusCodes.OK).json({ message: "Logout Successful" });
 };
-module.exports = {registerController, loginController, refresh}
+module.exports = {registerController, loginController, refresh, logout}
