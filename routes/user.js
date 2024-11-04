@@ -7,7 +7,7 @@ const authorized = require("../middleware/authorization")
 
 router.route('/:id').patch(authorized(["admin"]),updateUserValidation(),updateUser).
     delete(authorized(["admin"]),deleteUser)
-    .get(getUser);
+    .get(authorized(["admin"]),getUser);
 router.route("/").get(getAllUser);
 
 

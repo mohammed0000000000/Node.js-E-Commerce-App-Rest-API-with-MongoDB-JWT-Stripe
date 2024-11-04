@@ -28,9 +28,10 @@ const authenticateMiddleware = require("./middleware/authentication")
 /// routers
 const authRouter = require("./routes/auth")
 const userRouter = require("./routes/user")
-
+const productRouter = require("./routes/product");
 app.use("/api/v1/auth",authRouter);
 app.use("/api/v1/user",authenticateMiddleware,userRouter);
+app.use("/api/v1/product",authenticateMiddleware,productRouter)
 app.use(NotFoundMiddleware);
 app.use(errorHandlerMiddleware)
 

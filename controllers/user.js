@@ -55,4 +55,21 @@ res.status(StatusCodes.OK).json({
         users
     })
 }
-module.exports = {updateUser,deleteUser,getAllUser, getUser}
+
+const getStatus = async (req, res) => {
+    const date = new Date();
+    const lastYear = new Date(date.setFullYear(date.getFullYear() - 1));
+    const users = await User.aggregate(
+        [
+            {$match: {createdAt: {$gte: lastYear}}},
+            {$project: {month: {$month: "$createdAt"}}},
+            {$group: {_id: "$month", count: {$sum: 1}}},
+            {$sort: {_id: 1}}
+        ]
+    )
+    return res.status(StatusCodes.OK).json({
+        message: "Status fetched successfully",
+        users
+    })
+}
+module.exports = {updateUser,deleteUser,getAllUser, getUser,getStatus}
