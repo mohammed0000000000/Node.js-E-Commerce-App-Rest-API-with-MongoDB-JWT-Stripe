@@ -9,6 +9,8 @@ const express = require('express')
 const app = express()
 const PORT = process.env.PORT || 3001
 
+const cors = require("cors");
+
 const databaseConnection = require("./Database/DbConnection")
 
 /// Db Connection
@@ -21,6 +23,8 @@ app.use(express.urlencoded({ extended: true }));
 /// Serve static files from public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
+/// add cors
+app.use(cors());
 /// Middleware
 const NotFoundMiddleware = require("./middleware/notFound")
 const errorHandlerMiddleware = require("./middleware/errorHandler")
@@ -31,7 +35,7 @@ const userRouter = require("./routes/user")
 const productRouter = require("./routes/product");
 const cartRouter = require("./routes/cart");
 const orderRouter = require("./routes/order");
-
+const stripeRouter = require("./routes/stripe");
 
 
 app.use("/api/v1/auth",authRouter);
@@ -39,6 +43,7 @@ app.use("/api/v1/user",authenticateMiddleware,userRouter);
 app.use("/api/v1/product",authenticateMiddleware,productRouter);
 app.use("/api/v1/cart", authenticateMiddleware, cartRouter);
 app.use("/api/v1/order", authenticateMiddleware, orderRouter);
+app.use("/api/v1/checkout", authenticateMiddleware, stripeRouter);
 app.use(NotFoundMiddleware);
 app.use(errorHandlerMiddleware)
 
