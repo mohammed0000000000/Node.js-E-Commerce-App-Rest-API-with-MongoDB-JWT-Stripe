@@ -29,9 +29,16 @@ const authenticateMiddleware = require("./middleware/authentication")
 const authRouter = require("./routes/auth")
 const userRouter = require("./routes/user")
 const productRouter = require("./routes/product");
+const cartRouter = require("./routes/cart");
+const orderRouter = require("./routes/order");
+
+
+
 app.use("/api/v1/auth",authRouter);
 app.use("/api/v1/user",authenticateMiddleware,userRouter);
-app.use("/api/v1/product",authenticateMiddleware,productRouter)
+app.use("/api/v1/product",authenticateMiddleware,productRouter);
+app.use("/api/v1/cart", authenticateMiddleware, cartRouter);
+app.use("/api/v1/order", authenticateMiddleware, orderRouter);
 app.use(NotFoundMiddleware);
 app.use(errorHandlerMiddleware)
 

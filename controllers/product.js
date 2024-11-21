@@ -21,7 +21,20 @@ const get = async (req, res) => {
 }
 
 const getAll = async (req, res) => {
-    const products = await Product.find({});
+    const {new: queryNew, category} = req.query;
+
+    let products = [];
+    if(queryNew){
+        products = await Product.find({}).sort({createdAt: -1}).limit(5);
+    }
+    else if(category){
+        products = await Product.find({
+            categories:{
+                $in: [category]
+            }
+        })
+    }
+    else products = await Product.find({});
     res.status(StatusCodes.OK).json({
         message: products ? "Products retrieved successfully" : "There is no products",
         products: products ?? []
